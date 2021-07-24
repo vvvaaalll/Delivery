@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "346626120401",
+    "project_id": "dostava-8aa62",
+    "storage_bucket": "dostava-8aa62.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346626120401:android:11c64efa800de69936c3f0",
+        "android_client_info": {
+          "package_name": "vloboda.deliveryapp.delivery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "346626120401-n0u5uu2bt65uutsuvaci3h1bsq9770no.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtJWsJ8BLN3qSm7lF4GeIK-vUubsaOSm0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "346626120401-n0u5uu2bt65uutsuvaci3h1bsq9770no.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
