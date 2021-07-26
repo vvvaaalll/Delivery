@@ -6,6 +6,7 @@ public class Order {
     String phone;
     String address;
     String note;
+    String orderID;
 
     long time;
 
@@ -19,6 +20,14 @@ public class Order {
         this.address = address;
         this.note = note;
         this.time = time;
+    }
+
+    public String getOrderID() {
+        return orderID;
+    }
+
+    public void setOrderID(String orderID) {
+        this.orderID = orderID;
     }
 
     public String getName() {

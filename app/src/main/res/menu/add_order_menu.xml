@@ -2,9 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/addMenu"
-        android:title="Orders"
-        android:icon="@drawable/ic_add_location"
+    <item android:id="@+id/addMenuMap"
+        android:title="Map"
+        android:icon="@drawable/ic_map"
         app:showAsAction="ifRoom"/>
+
 
 </menu>

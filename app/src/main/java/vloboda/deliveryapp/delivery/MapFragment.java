@@ -3,6 +3,8 @@ package vloboda.deliveryapp.delivery;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,12 +26,23 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
@@ -38,6 +51,10 @@ MapFragment extends Fragment {
 
     private boolean locationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    FirebaseFirestore fStore;
+    private Geocoder geocoder;
+
+    ArrayList<Order> orderArrayList;
 
 
     private GoogleMap map;
@@ -49,20 +66,71 @@ MapFragment extends Fragment {
     @org.jetbrains.annotations.Nullable
     @Override
     public View onCreateView(@NonNull @org.jetbrains.annotations.NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_map, container,false);
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+
+        fStore = FirebaseFirestore.getInstance();
+        geocoder = new Geocoder(getContext());
+        orderArrayList = EventChangeListener();
+
+       // EventChangeListener();
 
         SupportMapFragment supportMapFragment = (SupportMapFragment)
                 getChildFragmentManager().findFragmentById(R.id.google_map);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+
+  /*      orderArrayList.forEach(order -> {
+            if (!order.address.isEmpty()) {
+                MarkerOptions marker = new MarkerOptions();
+                GeoPoint point = getLocationFromAddress(order.address);
+                marker.position(new LatLng(point.getLatitude(), point.getLongitude()));
+                map.addMarker(marker);
+            }
+        });
+    */
+
+
+
+
 
         supportMapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull @NotNull GoogleMap googleMap) {
                 //when map is loaded
                 map = googleMap;
+
                 getLocationPermission();
                 updateLocationUI();
                 getDeviceLocation();
+                //orderArrayList.add(new Order("String name", "String phone", "Sjenjak 39, Osijek", "String note", 1));
+                //orderArrayList.add(new Order("String name", "String phone", "Vijenac petrove gore 11, Osijek", "String note", 0));
+
+
+
+
+
+                    orderArrayList.forEach(order -> {
+                        try{
+                            if(order.address.isEmpty()){throw new Exception();}
+                            else{
+                                List<Address> addresses = geocoder.getFromLocationName(order.address, 1);
+                                Address address = addresses.get(0);
+                                Log.d(TAG, "onMapReady : " + address.toString());
+
+                                MarkerOptions markerOptions = new MarkerOptions()
+                                        .position(new LatLng(address.getLatitude(), address.getLongitude()))
+                                        .title(order.name +", "+ order.address);
+                                if(order.time==1){
+                                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(200));}
+                                map.addMarker(markerOptions);
+                                }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                    });
+
+
 
                 googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
@@ -70,21 +138,23 @@ MapFragment extends Fragment {
                         //when clicked on map
                         MarkerOptions markerOptions = new MarkerOptions();
 
-                        markerOptions.position(latLng);
+                        //markerOptions.position(latLng);
 
-                        markerOptions.title(latLng.latitude+":" +latLng.longitude);
+                        //markerOptions.title(latLng.latitude+":" +latLng.longitude);
 
-                        googleMap.clear();
+                        //googleMap.clear();
 
                         googleMap.animateCamera((CameraUpdateFactory.newLatLngZoom(latLng,16.0f)));
 
                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
 
-                        googleMap.addMarker(markerOptions);
+                       // googleMap.addMarker(markerOptions);
                     }
                 });
-            }
-        });
+
+                }
+            });
+
 
         return view;
     }
@@ -176,5 +246,77 @@ MapFragment extends Fragment {
     }
 
 
+    public GeoPoint getLocationFromAddress(String strAddress){
 
+        Geocoder coder = new Geocoder(getContext());
+        List<Address> address;
+        GeoPoint p1 = null;
+
+        try {
+            address = coder.getFromLocationName(strAddress,5);
+            if (address==null) {
+                return null;
+            }
+            Address location=address.get(0);
+            location.getLatitude();
+            location.getLongitude();
+
+            p1 = new GeoPoint((double) (location.getLatitude() * 1E6),
+                    (double) (location.getLongitude() * 1E6));
+
+            
+        }catch (IOException ex) {
+
+            ex.printStackTrace();
+        }
+        return p1;
+    }
+
+
+    private ArrayList<Order> EventChangeListener()
+    {
+        ArrayList<Order> orders = new ArrayList<Order>();
+
+        fStore.collection("orders")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+
+                        if(error != null){
+                            Log.e("Firestore error",error.getMessage());
+                        }
+
+                        for(DocumentChange fStore : value.getDocumentChanges()){
+
+                            if(fStore.getType() == DocumentChange.Type.ADDED){
+                                Order order =  fStore.getDocument().toObject(Order.class);
+
+                                order.setOrderID(fStore.getDocument().getId());
+                                orders.add(order);
+
+                            }
+
+                        }
+                    }
+                });
+        return orders;
+    }
+
+
+    public void AddMarker(){
+    try {
+        
+        List<Address> addresses = geocoder.getFromLocationName("Sjenjak 39, Osijek", 1);
+        Address address = addresses.get(0);
+        Log.d(TAG, "onMapReady : " + address.toString());
+
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(new LatLng(address.getLatitude(), address.getLongitude()))
+                .title(address.getLocality());
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(200));
+        map.addMarker(markerOptions);
+    }catch (IOException e){
+        e.printStackTrace();
+    }
+    }
 }
