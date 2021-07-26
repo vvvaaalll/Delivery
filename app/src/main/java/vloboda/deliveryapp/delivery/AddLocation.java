@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -29,8 +30,10 @@ public class AddLocation extends AppCompatActivity {
     EditText mName, mPhone, mAddress, mNote;
     CheckBox mTime;
     Button mSubmit;
+    String userID;
 
     FirebaseFirestore fStore;
+    FirebaseAuth fAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,8 @@ public class AddLocation extends AppCompatActivity {
         mSubmit = findViewById(R.id.btn_add_location);
 
         fStore = FirebaseFirestore.getInstance();
+        fAuth = FirebaseAuth.getInstance();
+        userID = fAuth.getCurrentUser().getUid();
 
 
         mSubmit.setOnClickListener(new View.OnClickListener() {
@@ -62,7 +67,7 @@ public class AddLocation extends AppCompatActivity {
                     time = 1;
                 }else{time = 0;}
 
-                DocumentReference documentReference = fStore.collection("orders").document();
+                DocumentReference documentReference = fStore.collection("users").document(userID).collection("orders").document();
 
                 HashMap<String,Object> order = new HashMap<>();
                 order.put("name", name);

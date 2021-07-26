@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -28,45 +29,42 @@ public class OrdersFragment extends Fragment {
     OrderAdapter myAdapter;
     ArrayList<Order> orderArrayList;
 
+    FirebaseAuth fAuth;
+    String userID;
+
+
     @Nullable
     @org.jetbrains.annotations.Nullable
     @Override
     public View onCreateView(@NonNull @org.jetbrains.annotations.NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_orders,container,false);
-        orderArrayList.add(new Order("String name", "String phone", "Sjenjak 39, Osijek", "String note", 1));
-        orderArrayList.add(new Order("String name", "String phone", "Vijenac petrove gore 11, Osijek", "String note", 0));
+
+        recyclerView = (RecyclerView) view.findViewById(R.id.rw_orders);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true);
 
         fStore = FirebaseFirestore.getInstance();
-        recyclerView = (RecyclerView) view.findViewById(R.id.rw_orders);
-        recyclerView.setHasFixedSize(true);
-       // orderArrayList = EventChangeListener();
-        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        fAuth     = FirebaseAuth.getInstance();
+        userID = fAuth.getCurrentUser().getUid().toString();
+
+
+        orderArrayList = new ArrayList<Order>();
+       // orderArrayList.add(new Order("String name", "String phone", "Sjenjak 39, Osijek", "String note", 1));
+       // orderArrayList.add(new Order("String name", "String phone", "Vijenac petrove gore 2, Osijek", "String note", 0));
 
 
 
+        myAdapter = new OrderAdapter(getContext(), orderArrayList);
 
-        myAdapter = new OrderAdapter(view.getContext(), orderArrayList);
         recyclerView.setAdapter(myAdapter);
+
         return view;
     }
 
-    @Override
-    public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-        /*fStore = FirebaseFirestore.getInstance();
-        orderArrayList = new ArrayList<Order>();
-        EventChangeListener();*/
-        orderArrayList = new ArrayList<Order>();
-       // orderArrayList.add(new Order());
-
-    }
-
-  /*  private ArrayList<Order> EventChangeListener()
+    private void EventChangeListener()
     {
-        ArrayList<Order> orders = new ArrayList<Order>();
-
-        fStore.collection("orders")
+        fStore.collection("users").document(userID).collection("orders")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -81,17 +79,16 @@ public class OrdersFragment extends Fragment {
                                 Order order =  fStore.getDocument().toObject(Order.class);
 
                                 order.setOrderID(fStore.getDocument().getId());
-                                orders.add(order);
+                                orderArrayList.add(order);
 
                             }
+                            myAdapter.notifyDataSetChanged();
 
                         }
                     }
                 });
-        myAdapter.UpdateAdapter(orders);
-        return orders;
     }
 
-*/
+
 
 }

@@ -2,6 +2,8 @@ package vloboda.deliveryapp.delivery;
 
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -28,9 +30,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -52,6 +56,8 @@ MapFragment extends Fragment {
     private boolean locationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     FirebaseFirestore fStore;
+    FirebaseAuth fAuth;
+    String userID;
     private Geocoder geocoder;
 
     ArrayList<Order> orderArrayList;
@@ -69,25 +75,19 @@ MapFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
         fStore = FirebaseFirestore.getInstance();
+        fAuth     = FirebaseAuth.getInstance();
+        userID = fAuth.getCurrentUser().getUid().toString();
         geocoder = new Geocoder(getContext());
-        orderArrayList = EventChangeListener();
+        orderArrayList = new ArrayList<Order>();
+        EventChangeListener();
 
-       // EventChangeListener();
 
         SupportMapFragment supportMapFragment = (SupportMapFragment)
                 getChildFragmentManager().findFragmentById(R.id.google_map);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
 
-  /*      orderArrayList.forEach(order -> {
-            if (!order.address.isEmpty()) {
-                MarkerOptions marker = new MarkerOptions();
-                GeoPoint point = getLocationFromAddress(order.address);
-                marker.position(new LatLng(point.getLatitude(), point.getLongitude()));
-                map.addMarker(marker);
-            }
-        });
-    */
+
 
 
 
@@ -96,7 +96,7 @@ MapFragment extends Fragment {
         supportMapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull @NotNull GoogleMap googleMap) {
-                //when map is loaded
+
                 map = googleMap;
 
                 getLocationPermission();
@@ -117,12 +117,14 @@ MapFragment extends Fragment {
                                 Address address = addresses.get(0);
                                 Log.d(TAG, "onMapReady : " + address.toString());
 
+                                LatLng position = new LatLng(address.getLatitude(), address.getLongitude());
+
                                 MarkerOptions markerOptions = new MarkerOptions()
-                                        .position(new LatLng(address.getLatitude(), address.getLongitude()))
+                                        .position(position)
                                         .title(order.name +", "+ order.address);
                                 if(order.time==1){
                                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(200));}
-                                map.addMarker(markerOptions);
+                                map.addMarker(markerOptions).setTag(position);
                                 }
                         }catch (Exception e){
                             e.printStackTrace();
@@ -130,7 +132,27 @@ MapFragment extends Fragment {
 
                     });
 
+                        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                            @Override
+                            public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
+                                LatLng position= marker.getPosition();
 
+                                orderArrayList.forEach(order -> {
+                                    try{
+                                        if(order.address.isEmpty()){throw new Exception();}
+                                        else{
+
+                                        }
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+
+                                });
+
+
+                                return false;
+                            }
+                        });
 
                 googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
@@ -151,6 +173,9 @@ MapFragment extends Fragment {
                        // googleMap.addMarker(markerOptions);
                     }
                 });
+
+
+
 
                 }
             });
@@ -273,11 +298,11 @@ MapFragment extends Fragment {
     }
 
 
-    private ArrayList<Order> EventChangeListener()
+    private void EventChangeListener()
     {
         ArrayList<Order> orders = new ArrayList<Order>();
 
-        fStore.collection("orders")
+        fStore.collection("users").document(userID).collection("orders")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -292,14 +317,14 @@ MapFragment extends Fragment {
                                 Order order =  fStore.getDocument().toObject(Order.class);
 
                                 order.setOrderID(fStore.getDocument().getId());
-                                orders.add(order);
+                                orderArrayList.add(order);
 
                             }
 
                         }
                     }
                 });
-        return orders;
+
     }
 
 
@@ -320,3 +345,65 @@ MapFragment extends Fragment {
     }
     }
 }
+
+
+
+/*
+                        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                            @Override
+                            public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
+                                LatLng position= marker.getPosition();
+
+                                orderArrayList.forEach(order -> {
+                                    try{
+                                        if(order.address.isEmpty()){throw new Exception();}
+                                        else{
+                                            List<Address> addresses = geocoder.getFromLocationName(order.address, 1);
+                                            Address address = addresses.get(0);
+                                            Log.d(TAG, "onMapReady : " + address.toString());
+
+                                            LatLng positionInArray = new LatLng(address.getLatitude(), address.getLongitude());
+                                            if(position == positionInArray){
+                                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                                builder.setTitle("Delivery");
+                                                builder.setMessage(order.name + ", " + order.address);
+
+                                                builder.setPositiveButton("Delivered", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        //DELETE FROM FIRESTORE
+                                                        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
+
+
+                                                        FirebaseFirestore.getInstance().collection("users").document(userID)
+                                                                .collection("orders").document(order.getOrderID()).delete();
+
+
+                                                        getContext().startActivity(new Intent(getContext(), MapFragment.class));
+                                                        //startActivity(new Intent(getApplicationContext(),Tarantulas.class));
+                                                        Toast.makeText(getContext(), "Succesfully deleted tarantula" , Toast.LENGTH_SHORT).show();
+
+                                                    }
+                                                })
+                                                        .setNegativeButton("back to map", new DialogInterface.OnClickListener() {
+                                                            @Override
+                                                            public void onClick(DialogInterface dialog, int which) {
+
+                                                            }
+                                                        });
+                                                AlertDialog ad = builder.create();
+                                                ad.show();
+
+
+                                            }
+                                        }
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+
+                                });
+
+
+                                return false;
+                            }
+ */
