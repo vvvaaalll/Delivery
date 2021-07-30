@@ -15,5 +15,10 @@
         android:icon="@drawable/ic_add_location"
         app:showAsAction="ifRoom"/>
 
+    <item android:id="@+id/menu_orders"
+        android:title="Orders"
+        android:icon="@drawable/ic_table"
+        app:showAsAction="ifRoom"/>
+
 
 </menu>

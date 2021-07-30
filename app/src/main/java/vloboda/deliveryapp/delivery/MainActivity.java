@@ -6,11 +6,9 @@ import androidx.fragment.app.Fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -65,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.addMenu:
                 startActivity(new Intent(getApplicationContext(),AddLocation.class));
+                finish();
+                return true;
+            case R.id.menu_orders:
+                startActivity(new Intent(getApplicationContext(), OrdersTempFragmentSubstitute.class));
                 finish();
                 return true;
             case R.id.logOutMenu:

@@ -1,17 +1,19 @@
 package vloboda.deliveryapp.delivery;
 
-
-import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
@@ -22,7 +24,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
-public class OrdersFragment extends Fragment {
+public class OrdersTempFragmentSubstitute extends AppCompatActivity {
 
     RecyclerView recyclerView;
     FirebaseFirestore fStore;
@@ -32,16 +34,14 @@ public class OrdersFragment extends Fragment {
     FirebaseAuth fAuth;
     String userID;
 
-
-    @Nullable
-    @org.jetbrains.annotations.Nullable
     @Override
-    public View onCreateView(@NonNull @org.jetbrains.annotations.NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_orders_temp_fragment_substitute);
 
-        View view = inflater.inflate(R.layout.fragment_orders,container,false);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.rw_orders);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView = (RecyclerView) findViewById(R.id.rw_orders);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
 
         fStore = FirebaseFirestore.getInstance();
@@ -50,17 +50,17 @@ public class OrdersFragment extends Fragment {
 
 
         orderArrayList = new ArrayList<Order>();
-        EventChangeListener();
+
         //orderArrayList.add(new Order("String name", "String phone", "Sjenjak 39, Osijek", "String note", 1));
         //orderArrayList.add(new Order("String name", "String phone", "Vijenac petrove gore 2, Osijek", "String note", 0));
 
 
 
-        myAdapter = new OrderAdapter(getContext(), orderArrayList);
+        myAdapter = new OrderAdapter(this, orderArrayList);
 
         recyclerView.setAdapter(myAdapter);
 
-        return view;
+        EventChangeListener();
     }
 
 
@@ -91,6 +91,46 @@ public class OrdersFragment extends Fragment {
                 });
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.general_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item){
+        switch (item.getItemId()){
+            case R.id.addMenu:
+                startActivity(new Intent(getApplicationContext(),AddLocation.class));
+                finish();
+                return true;
+            case R.id.menu_orders:
+                startActivity(new Intent(getApplicationContext(), OrdersTempFragmentSubstitute.class));
+                finish();
+                return true;
+            case R.id.logOutMenu:
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(getApplicationContext(),Login.class));
+                finish();
+                return true;
+            case R.id.deleteAccount:
+
+                FirebaseFirestore.getInstance().collection("users")
+                        .document(FirebaseAuth.getInstance().getUid().toString()).delete();
+                FirebaseAuth.getInstance().getCurrentUser().delete();
+
+                Toast.makeText(OrdersTempFragmentSubstitute.this, "Succesfully deleted your account" , Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(getApplicationContext(),Login.class));
+
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
 
 
 }
