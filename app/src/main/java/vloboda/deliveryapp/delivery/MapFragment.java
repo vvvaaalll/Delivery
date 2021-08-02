@@ -97,6 +97,7 @@ MapFragment extends Fragment {
             @Override
             public void onMapReady(@NonNull @NotNull GoogleMap googleMap) {
 
+
                 map = googleMap;
 
                 getLocationPermission();

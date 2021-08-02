@@ -3,7 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/AndroidStudioProjects/Delivery/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/AndroidStudioProjects/Delivery/app/src/main/res/layout/activity_orders_temp_fragment_substitute.xml" value="0.20520833333333333" />
+        <entry key="..\:/AndroidStudioProjects/Delivery/app/src/main/res/layout/fragment_map.xml" value="0.12129629629629629" />
         <entry key="..\:/AndroidStudioProjects/Delivery/app/src/main/res/layout/fragment_orders.xml" value="0.24048913043478262" />
         <entry key="..\:/AndroidStudioProjects/Delivery/app/src/main/res/layout/order_card.xml" value="0.24048913043478262" />
         <entry key="..\:/AndroidStudioProjects/Delivery/app/src/main/res/menu/general_menu.xml" value="0.11574074074074074" />
