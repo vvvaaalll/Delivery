@@ -38,31 +38,38 @@ public class OrdersFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull @org.jetbrains.annotations.NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_orders,container,false);
-
-        recyclerView = (RecyclerView) view.findViewById(R.id.rw_orders);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setHasFixedSize(true);
+        View view = inflater.inflate(R.layout.fragment_orders, container, false);
 
         fStore = FirebaseFirestore.getInstance();
-        fAuth     = FirebaseAuth.getInstance();
+        fAuth = FirebaseAuth.getInstance();
         userID = fAuth.getCurrentUser().getUid().toString();
-
 
         orderArrayList = new ArrayList<Order>();
         EventChangeListener();
-        //orderArrayList.add(new Order("String name", "String phone", "Sjenjak 39, Osijek", "String note", 1));
-        //orderArrayList.add(new Order("String name", "String phone", "Vijenac petrove gore 2, Osijek", "String note", 0));
 
+        recyclerView = (RecyclerView) view.findViewById(R.id.rw_orders);
+        if (recyclerView != null) {
+            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            recyclerView.setHasFixedSize(true);
 
+            myAdapter = new OrderAdapter(getContext(), orderArrayList);
+            recyclerView.setAdapter(myAdapter);
+        }
+        else{
+            Log.e("Error", "unable to find recyclerView");
 
-        myAdapter = new OrderAdapter(getContext(), orderArrayList);
+        }
 
-        recyclerView.setAdapter(myAdapter);
-
-        return view;
+        return view;//inflater.inflate(R.layout.fragment_orders, container, false);
     }
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+
+    }
 
     private void EventChangeListener()
     {
@@ -94,3 +101,13 @@ public class OrdersFragment extends Fragment {
 
 
 }
+
+
+
+
+
+
+
+
+//orderArrayList.add(new Order("String name", "String phone", "Sjenjak 39, Osijek", "String note", 1));
+//orderArrayList.add(new Order("String name", "String phone", "Vijenac petrove gore 2, Osijek", "String note", 0));
