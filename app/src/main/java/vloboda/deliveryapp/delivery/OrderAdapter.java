@@ -147,9 +147,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.order_card, parent, false);
+        View v;
+        v = LayoutInflater.from(context).inflate(R.layout.order_card, parent, false);
         return new MyViewHolder(v);
-
     }
 
     @Override
@@ -160,7 +160,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
         holder.phone.setText(order.phone);
         holder.address.setText(order.address);
         holder.note.setText(order.note);
-
+        holder.order = order;
         if (order.time == 1) {
             holder.time.setText("after 4PM");
         } else {
@@ -177,8 +177,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        EditText name, phone, address, note;
-        CheckBox time;
+        TextView name, phone, address, note, time;
         Order order;
 
         public MyViewHolder(@NonNull View itemView) {
@@ -192,13 +191,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
 
             time = itemView.findViewById(R.id.tvTime);
 
+    //TODO: add message onClick
 
-/*
             itemView.findViewById(R.id.RW_deletebtn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(itemView.getContext());
-                    builder.setTitle("Do you want to delete this tarantula?");
+                    builder.setTitle("Do you want to delete this order?");
 
                     builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
@@ -207,12 +206,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
                             String userID = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
 
                             FirebaseFirestore.getInstance().collection("orders").document(userID)
-                                    .collection("orders").document(order.getOrderID()).delete();
+                                    .collection("orders").document(order.getOrderID().toString()).delete();
 
 
                             itemView.getContext().startActivity(new Intent(itemView.getContext(), MainActivity.class));
-                            //startActivity(new Intent(getApplicationContext(),Tarantulas.class));
-                            Toast.makeText(itemView.getContext(), "Succesfully deleted tarantula" , Toast.LENGTH_SHORT).show();
+
+                            Toast.makeText(itemView.getContext(), "Succesfully deleted order" , Toast.LENGTH_SHORT).show();
 
                         }
                     })
@@ -226,7 +225,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
                     ad.show();
                 }
             });
-*/
+
         }
 
 

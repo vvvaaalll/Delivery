@@ -29,6 +29,7 @@ public class OrdersFragment extends Fragment {
     OrderAdapter myAdapter;
     ArrayList<Order> orderArrayList;
 
+    View view;
     FirebaseAuth fAuth;
     String userID;
 
@@ -38,7 +39,7 @@ public class OrdersFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull @org.jetbrains.annotations.NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_orders, container, false);
+        view = inflater.inflate(R.layout.fragment_orders, container, false);
 
         fStore = FirebaseFirestore.getInstance();
         fAuth = FirebaseAuth.getInstance();
@@ -60,7 +61,7 @@ public class OrdersFragment extends Fragment {
 
         }
 
-        return view;//inflater.inflate(R.layout.fragment_orders, container, false);
+        return view;
     }
 
 

@@ -69,10 +69,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(),AddLocation.class));
                 finish();
                 return true;
-            case R.id.menu_orders:
-                startActivity(new Intent(getApplicationContext(), OrdersTempFragmentSubstitute.class));
-                finish();
-                return true;
             case R.id.logOutMenu:
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(getApplicationContext(),Login.class));
