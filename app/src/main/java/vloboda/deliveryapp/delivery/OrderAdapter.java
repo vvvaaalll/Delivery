@@ -108,7 +108,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
                             //DELETE FROM FIRESTORE
                             String userID = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
 
-                            FirebaseFirestore.getInstance().collection("orders").document(userID)
+                            FirebaseFirestore.getInstance().collection("users").document(userID)
                                     .collection("orders").document(order.getOrderID().toString()).delete();
 
 
