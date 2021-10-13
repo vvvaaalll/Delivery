@@ -1,10 +1,14 @@
 package vloboda.deliveryapp.delivery;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -31,9 +37,11 @@ import java.util.ArrayList;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder> {
 
-
+    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS =0 ;
     Context context;
     ArrayList<Order> list;
+    String phoneNo;
+    String message = "Your order will be delivered within 15minutes";
 
     public OrderAdapter(ArrayList<Order> list) {
         this.list = list;
@@ -78,7 +86,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
         return list.size();
     }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView name, phone, address, note, time;
         Order order;
@@ -94,7 +102,36 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
 
             time = itemView.findViewById(R.id.tvTime);
 
-    //TODO: add message onClick
+
+            itemView.findViewById(R.id.RW_message).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(itemView.getContext());
+                    builder.setTitle("Do you want to send message to "+phone.getText().toString()+"?");
+                    builder.setMessage("Your order will be delivered within 15minutes");
+
+                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            phoneNo = phone.getText().toString();
+                            SmsManager smsManager = SmsManager.getDefault();
+                            smsManager.sendTextMessage(phoneNo, null, message, null, null);
+                          //  sendSMSMessage();
+                            Toast.makeText(itemView.getContext(), "SMS message sent" , Toast.LENGTH_SHORT).show();
+
+                        }
+                    })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                }
+                            });
+                    AlertDialog ad = builder.create();
+                    ad.show();
+                }
+            });
+
 
             itemView.findViewById(R.id.RW_deletebtn).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -108,7 +145,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
                             //DELETE FROM FIRESTORE
                             String userID = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
 
-                            FirebaseFirestore.getInstance().collection("orders").document(userID)
+                            FirebaseFirestore.getInstance().collection("users").document(userID)
                                     .collection("orders").document(order.getOrderID().toString()).delete();
 
 
@@ -138,4 +175,24 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
         this.list = mDataList;
         notifyDataSetChanged();
     }
+
+    protected void sendSMSMessage() {
+
+
+        if (ContextCompat.checkSelfPermission(context,
+                Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context,
+                    Manifest.permission.SEND_SMS)) {
+            } else {
+                ActivityCompat.requestPermissions((Activity) context,
+                        new String[]{Manifest.permission.SEND_SMS},
+                        MY_PERMISSIONS_REQUEST_SEND_SMS);
+            }
+        }
+    }
+
+
+
+
 }
