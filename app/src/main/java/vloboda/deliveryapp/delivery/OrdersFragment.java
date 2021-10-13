@@ -110,5 +110,3 @@ public class OrdersFragment extends Fragment {
 
 
 
-//orderArrayList.add(new Order("String name", "String phone", "Sjenjak 39, Osijek", "String note", 1));
-//orderArrayList.add(new Order("String name", "String phone", "Vijenac petrove gore 2, Osijek", "String note", 0));
